@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en"> 
+<head>
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/> 
+    <title>Web Animation(canvas_js_css)</title>
+    <style>
+        body { margin: 0; padding: 0; text-align: center; font-family: sans-serif; }
+        #canvas { background: #dcd7c9; display: block; margin: 0 auto; }
+        @media (min-width: 769px){ #canvas { width: 600px; height: 600px; } }
+        @media (max-width: 768px){ #canvas { width:320px; height:320px; } 
+            .btnset{display: block;}
+        }
+        
+        .btnset{
+            margin-top: 10px;
+        }
+        .btn{
+            margin: 5px; font-size: 18px; padding: 10px 20px 
+        }
+        #retryBtn{
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="btnset">
+        <button id="startBtn">시작하기</button>
+        <button id="retryBtn">다시하기</button>
+    </div>
+<script>
+const drawingBoard = document.getElementById('canvas');
+const drawingpen = drawingBoard.getContext('2d');
+
+drawingBoard.width = drawingBoard.clientWidth;
+drawingBoard.height = drawingBoard.clientWidth;
+
+let x = 0;
+let y = 590;
+
+let xb = [];
+let yb = [];
+let xc = [];
+let yc = [];
+
+for (let i = 0; i < 10; i++) {
+    xb.push(Math.floor(Math.random() * 590));
+    yb.push(Math.floor(Math.random() * 590));
+}
+
+for (let j=0; j<5;j++){
+    xc.push(Math.floor(Math.random() * 590));
+    yc.push(Math.floor(Math.random() * 590));
+}
+
+let randomx = 0;
+let randomy = 0;
+let randomx2 = 0;
+let randomy2 = 0;
+let RED1 = 10;
+
+let timecount = 0.00;
+let Fixtimecount = 0.00;
+let isGameOver = false;
+let isGameStarted = false; 
+
+const moveAmount = 5;
+
+function moveRight(){ if(isGameStarted) x = x + moveAmount; }
+function moveLeft(){ if(isGameStarted) x = x - moveAmount; }
+function moveDown(){ if(isGameStarted) y = y + moveAmount; }
+function moveUp(){ if(isGameStarted) y = y - moveAmount; }
+
+function drawHero(){
+    drawingpen.fillStyle = 'black';
+    drawingpen.fillRect(x, y, 10, 10);
+}
+
+function enemy1(){
+    drawingpen.fillStyle = 'red';
+    for (let i = 0; i < xb.length; i++) {
+        drawingpen.fillRect(xb[i], yb[i], 20, 20);
+    }
+}
+
+function enemy2(){
+    drawingpen.fillStyle = 'blue';
+    for (let j =0; j < xc.length; j++){
+        drawingpen.fillRect(xc[j], yc[j], 20, 20);
+    }
+}
+
+function collision1(){
+    if(!isGameStarted) return; 
+    
+    for (let i = 0; i < xb.length; i++) {
+        if (x < xb[i] + 20 && x + 10 > xb[i] &&
+            y < yb[i] + 20 && y + 10 > yb[i]) {
+            
+            xb[i] = randomx;
+            yb[i] = randomy;
+            RED1 -= 1;
+
+            if (RED1 <= 0 && !isGameOver) {
+                RED1 = 0;
+                isGameOver = true;
+                Fixtimecount = timecount;
+                document.getElementById('retryBtn').style.display = 'inline-block';
+            }
+        }
+    }
+}
+
+function collision2(){
+    if(!isGameStarted) return; 
+    
+    for (let j = 0; j < xc.length; j++) {
+        if (x < xc[j] + 20 && x + 20 > xc[j] &&
+            y < yc[j] + 20 && y + 20 > yc[j]) {
+            
+            xc[j] = randomx2;
+            yc[j] = randomy2;
+            RED1 -= 1;
+
+            if (RED1 <= 0 && !isGameOver) {
+                RED1 = 0;
+                isGameOver = true;
+                Fixtimecount = timecount;
+                document.getElementById('retryBtn').style.display = 'inline-block';
+            }
+        }
+    }
+}
+
+function start(){
+    isGameStarted = true;
+    document.getElementById('startBtn').style.display = 'none'; 
+}
+
+function retry(){
+    x = 0; 
+    y = 590;  
+    xb = [];
+    yb = [];
+    xc = [];
+    yc = [];
+    
+    for (let i = 0; i < 10; i++) {
+        xb.push(Math.floor(Math.random() * 590));
+        yb.push(Math.floor(Math.random() * 590));
+    }
+    
+    for (let j = 0; j < 5; j++){
+        xc.push(Math.floor(Math.random() * 590));
+        yc.push(Math.floor(Math.random() * 590));
+    }
+    
+    RED1 = 10; 
+    timecount = 0.00; 
+    Fixtimecount = 0.00; 
+    isGameOver = false;
+    isGameStarted = true; 
+    document.getElementById('retryBtn').style.display = 'none';
+}
+
+setInterval(() => {
+    if(!isGameStarted) return; 
+    
+    randomx = Math.random() * 590;
+    randomy = Math.random() * 590;
+
+    do {
+        randomx2 = Math.random() * 590;
+    } while (Math.abs(randomx2 - randomx) < 20);
+    
+    do {
+        randomy2 = Math.random() * 590;
+    } while (Math.abs(randomy2 - randomy) < 20);
+}, 1000);
+
+let timerId = setInterval(() => {
+    if (!isGameOver && isGameStarted) { 
+        timecount += 0.01;
+    }
+}, 10);
+
+function move_limit(){
+    if(x < 0){ x = 0; } 
+    else if(x > 590){ x = 590; }
+    if(y < 0){ y = 0; } 
+    else if(y > 590){ y= 590; }
+}
+
+function drawCoordinate(){
+    drawingpen.fillStyle = 'black';
+    drawingpen.font = '12px sans-serif';
+    drawingpen.fillText(`x: ${x} y: ${y}`, 10, 20);
+    
+    drawingpen.fillText(`xb: ${xb.join(", ")}`, 10, 40);
+    drawingpen.fillText(`yb: ${yb.join(", ")}`, 10, 60);
+
+    drawingpen.fillText(`xc: ${xc.join(", ")}`, 10, 80);
+    drawingpen.fillText(`yc: ${yc.join(", ")}`, 10, 100);
+
+    drawingpen.fillText(`시간: ${timecount.toFixed(2)}초`, 10, 120);
+    drawingpen.fillText(`남은 RED: ${RED1}`, 10, 140);
+
+    if (RED1 === 0){
+        drawingpen.fillText(`미션성공 시간: ${Fixtimecount.toFixed(2)}초`, 300, 300);
+    }
+}
+
+function draw(){
+    drawingpen.clearRect(0,0,drawingBoard.width, drawingBoard.height);
+    drawHero();
+    enemy1();
+    enemy2();
+    collision1();
+    collision2();
+    move_limit();
+    drawCoordinate();
+    requestAnimationFrame(draw);
+}
+draw();
+
+document.addEventListener('keydown', (e) => {
+    switch(e.key){
+        case 'ArrowLeft' : moveLeft(); break;
+        case 'ArrowRight': moveRight(); break;
+        case 'ArrowUp'   : moveUp(); break;
+        case 'ArrowDown' : moveDown(); break;
+    }
+});
+
+document.getElementById('startBtn').addEventListener('click', start);
+document.getElementById('retryBtn').addEventListener('click', retry);
+</script>
+</body>
+</html>
